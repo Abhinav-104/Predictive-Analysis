@@ -19,7 +19,7 @@ library(kableExtra)
 
 Opening the file by using `read.csv()` function. 'and let the user choose the file using the `file.choose()` function.'
 ```{r}
-Data <- read.csv('D:\\IISc Banglore\\M Tech Project\\MTech_Project_Python\\Clinical and Immuno_Data.csv') # to let user choose file - "file.choose(), header = T, row.names = 1" within read.csv()
+Data <- read.csv('Clinical and Immuno_Data.csv') # to let user choose file - "file.choose(), header = T, row.names = 1" within read.csv()
 ```
 
 Viewing the data and the variables involved.
