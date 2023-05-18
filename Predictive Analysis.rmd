@@ -1,0 +1,113 @@
+---
+title: "Predictive Analysis of Diabetes"
+author: "Abhinav Raghunath"
+date: "2023-05-08"
+output: html_document
+---
+Importing all the needed Libraries. The libraries are:-
+1. stats - heatmap,
+2. dplyr - functions like `rowSums` and %>% (pipe operator)
+2. knitr - for using kable -used for better visualization of tables
+3. kableExtra - for additional modifications to table using `kable` function.
+```{r message = FALSE, warning = FALSE}
+library(stats)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+```
+
+
+Opening the file by using `read.csv()` function. 'and let the user choose the file using the `file.choose()` function.'
+```{r}
+Data <- read.csv('D:\\IISc Banglore\\M Tech Project\\MTech_Project_Python\\Clinical and Immuno_Data.csv') # to let user choose file - "file.choose(), header = T, row.names = 1" within read.csv()
+```
+
+Viewing the data and the variables involved.
+```{r}
+kable(head(Data)) %>% kable_styling("striped") %>% scroll_box(width = "100%")
+dim(Data)
+names(Data)
+```
+There are 52 data values consisting of 33 variables
+
+To see the mean and range of variables in the data
+```{r}
+kable(summary(Data)) %>% kable_styling("striped") %>% scroll_box(width = "100%")
+str(Data)
+```
+
+## Standardising the Data
+```{r Standardize the Data}
+Data_std <- Data[]
+Data_std[,-c(1,7,8)] <- scale(Data_std[,-c(1,7,8)])
+
+```
+`scale()` function standardize the data and scale it to center. in this particular scaling the mean have been scaled to one and sd to 0. This is also called as z scored normalisation.
+Here we have not standardized 3 columns which contains Patient ID, Ulcer healing status and Ulcer stage as those are non-parametric variables.
+
+The standardised Data will look like this:-
+```{r}
+kable(Data_std) %>% kable_styling("striped") %>% scroll_box(width = "100%", height = '500px')
+```
+
+## Plot
+```{r}
+#plot(Data) # Don't give anything significant since the no of variable is large.
+```
+
+##  Correlation Analysis
+```{r}
+cor_matrix <- cor(Data_std[,-c(1)])
+cor_matrix
+```
+Since the correlation matrix is large due to large number of variables, we need a better way to visualize the correlation. For this we could use a heatmap of the correlation
+```{r}
+heatmap(cor_matrix,
+        Rowv = NA,
+        Colv = NA,
+        col = colorRampPalette(c("blue", "white", "red"))(100),
+        scale = "none",
+        margins = c(5, 5))
+```
+In this heatmap `Rowv = NA` and `Colv = NA` disable row and column clustering and `scale = "none"` disable row and column scaling. And the  colors represent the correlation coefficients. Positive correlations are represented by shades of red, while negative correlations are represented by shades of blue. White squares represent correlations that are close to zero.
+Even with a heatmap it is difficult to analyse any considerable info from this data due to large number of variables and combinations.
+
+Now we will analyse the correlation between the ulcer healing status and other variables. Ulcer healing status is a qualitative variable whose value is '0' if the ulcer did not heal and '1' if it heals.
+```{r}
+cor_w_healing <- cor(Data_std[,-c(1,8)],Data_std[,8])
+cor_w_healing
+```
+```{r}
+
+image(cor_w_healing,
+      col = colorRampPalette(c("blue", "white", "red"))(100),
+      xlab = "",
+      ylab = "",
+      main = "Correlation Matrix")
+```
+
+
+## Data Preprocessing
+Check whether there is any missing data. we can check this by checking whether there is NA. (Do this step before standardization)
+```{r}
+missing_row <- which(rowSums(is.na(Data))>0)
+
+if(length(missing_row) > 0){
+  print("The Data has some rows with missing values")
+  kable(Data[missing_row,]) %>% kable_styling("striped") %>% scroll_box(width = "100%")
+} else {
+  print("There is no missing data in the Dataframe")
+}
+
+```
+Here `is.na(Data)` checks whether there is any missing data throughout and then `rowSums` check the number of missing data in each row. Then if a particular row has missing data that rows index is added to `missing_row`.
+
+Here we have used `kable` to show a better stylized table. There is a `kableExtra` package which can do further modifications to the table. In the `kableExtra` the `kable_styling("striped")` gives a striped style to the table and `scroll_box(width = "100%")` gives a horizontal scroll bar to the table.
+
+If you only wants to just check whether there is any missing observation throughout the dataframe you can just check `sum(is.na(Data)) == 0`. If it is **TRUE** then there are no missing data.
+
+
+## Machine Learning
+The Diabetes data that we have consists of Ulcer healing status as our output variables while all other variables could be considered as input
+
+###
